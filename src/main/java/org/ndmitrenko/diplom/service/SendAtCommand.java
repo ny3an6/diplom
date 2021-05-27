@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class SendAtCommand {
 
     public List<String> getATAnswer(String fileName) {
-        ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath(fileName));
+        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
         processBuilder.redirectErrorStream(true);
         List<String> results = new ArrayList<>();
         Process process = null;

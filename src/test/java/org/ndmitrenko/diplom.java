@@ -1,7 +1,15 @@
 package org.ndmitrenko;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.junit.Test;
 
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.SimpleScriptContext;
 import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,19 +27,51 @@ public class diplom {
 
     @Test
     public void givenPythonScript_whenPythonProcessInvoked_thenSuccess() throws Exception {
-        ProcessBuilder processBuilder = new ProcessBuilder("python3", resolvePythonScriptPath("Hello.py"));
+        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("Hello.py"));
         processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();
         List<String> results = readProcessOutput(process.getInputStream());
         System.out.println(results);
-        assertThat("Results should not be empty", results, is(not(empty())));
-        assertThat("Results should contain output of script: ", results, hasItem(
-                containsString("Hello Baeldung Readers!!")));
+
 
         int exitCode = process.waitFor();
         assertEquals("No errors should be detected", 0, exitCode);
     }
+
+    @Test
+    public void givenPythonScript_whenPythonProcessExecuted_thenSuccess()
+            throws ExecuteException, IOException {
+        String line = "python " + resolvePythonScriptPath("Hello.py");
+        CommandLine cmdLine = CommandLine.parse(line);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
+
+        DefaultExecutor executor = new DefaultExecutor();
+        executor.setStreamHandler(streamHandler);
+
+        int exitCode = executor.execute(cmdLine);
+        assertEquals("No errors should be detected", 0, exitCode);
+        assertEquals("Should contain script output: ", "Hello Baeldung Readers!!", outputStream.toString()
+                .trim());
+    }
+
+    @Test
+    public void givenPythonScriptEngineIsAvailable_whenScriptInvoked_thenOutputDisplayed() throws Exception {
+        StringWriter writer = new StringWriter();
+        ScriptContext context = new SimpleScriptContext();
+        context.setWriter(writer);
+
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("python");
+        engine.eval(new FileReader(resolvePythonScriptPath("Hello.py")), context);
+        assertEquals("Should contain script output: ", "Hello Baeldung Readers!!", writer.toString().trim());
+    }
+
+
+
+
 
     private String resolvePythonScriptPath(String filename) {
         File file = new File("src/main/resources/ATCommandsScripts/" + filename);
