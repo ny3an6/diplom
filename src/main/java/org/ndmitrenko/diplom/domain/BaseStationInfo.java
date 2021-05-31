@@ -8,9 +8,9 @@ public class BaseStationInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", unique = true, nullable = false)
+    //@Column(name = "id", unique = true, nullable = false)
     private Long id;
-    @Column(name = "cell_id")
+    @Column(name = "cell_id", unique = true)
     private Integer CellId;
     @Column(name = "MCC")
     private Integer MCC;

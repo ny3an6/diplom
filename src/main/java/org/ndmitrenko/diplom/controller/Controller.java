@@ -21,6 +21,7 @@ public class Controller {
 
     @GetMapping("/")
     public List<String> getStarted(){
+        sendAtCommand.createData();
         return sendAtCommand.getATAnswer("Hello.py");
     }
 }

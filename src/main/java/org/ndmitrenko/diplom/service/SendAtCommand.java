@@ -1,5 +1,8 @@
 package org.ndmitrenko.diplom.service;
 
+import org.ndmitrenko.diplom.domain.BaseStationInfo;
+import org.ndmitrenko.diplom.repository.BaseStationInfoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -11,6 +14,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class SendAtCommand {
+
+    @Autowired
+    private BaseStationInfoRepository baseStationInfoRepository;
 
     public List<String> getATAnswer(String fileName) {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
@@ -43,5 +49,12 @@ public class SendAtCommand {
             return output.lines()
                     .collect(Collectors.toList());
         }
+    }
+    public void createData(){
+        BaseStationInfo bs = new BaseStationInfo();
+        bs.setBER(1);
+        bs.setCellId(3);
+
+        baseStationInfoRepository.save(bs);
     }
 }
