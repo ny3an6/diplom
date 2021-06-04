@@ -13,10 +13,33 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class SendAtCommand {
+public class AtCommandService {
 
     @Autowired
     private BaseStationInfoRepository baseStationInfoRepository;
+
+//    public String getATAnswer(String fileName) {
+//        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
+//        processBuilder.redirectErrorStream(true);
+//        List<String> results = new ArrayList<>();
+//        Process process = null;
+//        int exitCode;
+//        try {
+//            process = processBuilder.start();
+//            results = readProcessOutput(process.getInputStream());
+//            exitCode = process.waitFor();
+//        } catch (IOException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        String newString = results.stream().filter(x -> !x.isEmpty()).collect(Collectors.joining(", "));
+//        //String newString = results.stream().map(this::parseATString).collect(Collectors.joining());
+//
+//        System.out.println(results);
+//        System.out.println(results.size());
+//        System.out.println(newString);
+//        return newString;
+//    }
 
     public List<String> getATAnswer(String fileName) {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
@@ -32,15 +55,24 @@ public class SendAtCommand {
             e.printStackTrace();
         }
 
-        System.out.println(results);
+        String newString = results.stream().filter(x -> !x.isEmpty()).collect(Collectors.joining(", "));
+        //String newString = results.stream().map(this::parseATString).collect(Collectors.joining());
 
+        System.out.println(results);
+        System.out.println(results.size());
+        System.out.println(newString);
         return results;
+    }
+
+    private String parseATString(String atString){
+        StringBuilder builder = new StringBuilder(atString);
+        String parsedString = builder.substring(0);
+
+        return parsedString;
     }
 
     private String resolvePythonScriptPath(String filename) {
         File file = new File("src/main/resources/ATCommandsScripts/" + filename);
-        System.out.println(file);
-        System.out.println(file);
         return file.getAbsolutePath();
     }
 
@@ -50,7 +82,8 @@ public class SendAtCommand {
                     .collect(Collectors.toList());
         }
     }
-    public void createData(){
+
+    public void createTestData() {
         BaseStationInfo bs = new BaseStationInfo();
         bs.setBER(1);
         bs.setCellId(3);

@@ -27,7 +27,7 @@ public class diplom {
 
     @Test
     public void givenPythonScript_whenPythonProcessInvoked_thenSuccess() throws Exception {
-        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("Hello.py"));
+        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("CellId.py"));
         processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();
@@ -42,7 +42,7 @@ public class diplom {
     @Test
     public void givenPythonScript_whenPythonProcessExecuted_thenSuccess()
             throws ExecuteException, IOException {
-        String line = "python " + resolvePythonScriptPath("Hello.py");
+        String line = "python " + resolvePythonScriptPath("CellId.py");
         CommandLine cmdLine = CommandLine.parse(line);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -65,7 +65,7 @@ public class diplom {
 
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("python");
-        engine.eval(new FileReader(resolvePythonScriptPath("Hello.py")), context);
+        engine.eval(new FileReader(resolvePythonScriptPath("CellId.py")), context);
         assertEquals("Should contain script output: ", "Hello Baeldung Readers!!", writer.toString().trim());
     }
 
