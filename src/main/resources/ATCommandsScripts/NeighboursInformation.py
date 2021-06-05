@@ -2,12 +2,12 @@ import serial
 
 
 def getStatus():
-    ser = serial.Serial('COM6', 115200, timeout = 1)
-    cmd = "AT+CPSI?\r"
-    # cmd = "AT+COPS=5\r"
+    ser = serial.Serial('COM6', 115200, timeout = 2)
+    cmd = "AT+CGSETI?\r"
+    cmd = "AT+MONI\r"
     ser.write(cmd.encode())
     # response = ser.read(2)
-    response = ser.read(64)
+    response = ser.read(1024)
     print(response.decode('utf-8'))
     # print(type(response.decode('utf-8')))
     ser.close()

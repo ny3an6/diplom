@@ -1,11 +1,11 @@
 package org.ndmitrenko.diplom.controller;
 
+import org.ndmitrenko.diplom.dto.response.MainInfo;
 import org.ndmitrenko.diplom.service.AtCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class Controller {
@@ -18,8 +18,9 @@ public class Controller {
     }
 
     @GetMapping("/")
-    public List<String> getStarted(){
+    @CrossOrigin
+    public MainInfo getStarted(){
 //        sendAtCommand.createData();
-        return sendAtCommand.getATAnswer("CellId.py");
+        return sendAtCommand.getATAnswer("MainInfo.py");
     }
 }

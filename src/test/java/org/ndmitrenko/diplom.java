@@ -1,82 +1,91 @@
 package org.ndmitrenko;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.PumpStreamHandler;
-import org.junit.Test;
+import com.google.common.base.Splitter;
 
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.SimpleScriptContext;
+import org.junit.Test;
+import org.ndmitrenko.dto.response.MainInfo;
+
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+
 
 
 public class diplom {
 
     @Test
-    public void givenPythonScript_whenPythonProcessInvoked_thenSuccess() throws Exception {
-        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("CellId.py"));
+    public void getATAnswer() {
+        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("NeighboursInformation.py"));
         processBuilder.redirectErrorStream(true);
+        List<String> results = new ArrayList<>();
+        Process process = null;
+        int exitCode;
+        try {
+            process = processBuilder.start();
+            results = readProcessOutput(process.getInputStream());
+            exitCode = process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        Process process = processBuilder.start();
-        List<String> results = readProcessOutput(process.getInputStream());
-        System.out.println(results);
-
-
-        int exitCode = process.waitFor();
-        assertEquals("No errors should be detected", 0, exitCode);
+        // +CCINFO= [SCELL], ARFCN= 1020, MCC= 250, MNC= 01, LAC= 332, ID= 25071, BSIC= 11, RXLev= -64dBm, C1= 42, C2= 42, TA= 0, TXPWR= 0
+        System.out.println(parseAnswerMainInfo(results));
+        System.out.println("");
+        System.out.println(parseNeighBorsInfo(results));
     }
 
-    @Test
-    public void givenPythonScript_whenPythonProcessExecuted_thenSuccess()
-            throws ExecuteException, IOException {
-        String line = "python " + resolvePythonScriptPath("CellId.py");
-        CommandLine cmdLine = CommandLine.parse(line);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-
-        DefaultExecutor executor = new DefaultExecutor();
-        executor.setStreamHandler(streamHandler);
-
-        int exitCode = executor.execute(cmdLine);
-        assertEquals("No errors should be detected", 0, exitCode);
-        assertEquals("Should contain script output: ", "Hello Baeldung Readers!!", outputStream.toString()
-                .trim());
+    private org.ndmitrenko.dto.response.MainInfo parseAnswerMainInfo(List<String> atString) {
+        Map<String, String> map = new HashMap<>();
+        String refactoredString = "";
+        for (String string : atString) {
+            if(string.contains("C1")) {
+                String str = string.replace("+MONI: ", "").replace("-", "");
+                int index = str.indexOf(",C1");
+                refactoredString = str.substring(0, index);
+                System.out.println("STRING " + refactoredString);
+                if (refactoredString.contains("Nc")) {
+                    map = Splitter.on(",").withKeyValueSeparator(":").split(refactoredString);
+                }
+            }
+        }
+        return MainInfo.fromHashMapsToDto(map);
     }
 
-    @Test
-    public void givenPythonScriptEngineIsAvailable_whenScriptInvoked_thenOutputDisplayed() throws Exception {
-        StringWriter writer = new StringWriter();
-        ScriptContext context = new SimpleScriptContext();
-        context.setWriter(writer);
+    private List<MainInfo> parseNeighBorsInfo(List<String> atString){
+        List<Map<String, String>> hashMaps = new ArrayList<>();
+        String refactoredString = "";
+        Map<String, String> map = new HashMap<>();
+        List<String> cellNeighborsList = new ArrayList<>();
+        StringBuilder stringBuilder;
+        String parsedString;
+        for (String string : atString) {
+            if(string.contains("Cell")) {
+                String str = string.replace("+MONI: ", "").replace("Adj", "").replace("-", "")
+                        .replace("[", "").replace("]", "");
+                int index = str.indexOf(",C1");
+                refactoredString = str.substring(0, index);
+                stringBuilder = new StringBuilder(refactoredString);
+                stringBuilder.insert(0, "CellName:");
+                parsedString = stringBuilder.toString();
+                System.out.println("STRING 2 " + parsedString);
+                map = Splitter.on(",").withKeyValueSeparator(":").split(parsedString);
+                hashMaps.add(map);
+            }
+        }
 
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("python");
-        engine.eval(new FileReader(resolvePythonScriptPath("CellId.py")), context);
-        assertEquals("Should contain script output: ", "Hello Baeldung Readers!!", writer.toString().trim());
+
+        //System.out.println(hashMaps);
+        System.out.println(MainInfo.fromHashMapsToDto(hashMaps));
+        return null;
     }
-
-
-
-
 
     private String resolvePythonScriptPath(String filename) {
         File file = new File("src/main/resources/ATCommandsScripts/" + filename);
-        System.out.println(file);
-        System.out.println(file);
         return file.getAbsolutePath();
     }
 
