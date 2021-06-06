@@ -18,7 +18,7 @@ public class AtCommandService {
     @Autowired
     private BaseStationInfoRepository baseStationInfoRepository;
 
-    public MainInfo getATAnswer(String fileName) {
+    public MainInfo getMainInfo(String fileName) {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
         processBuilder.redirectErrorStream(true);
         List<String> results = new ArrayList<>();
@@ -38,23 +38,63 @@ public class AtCommandService {
         return parseAnswer(results);
     }
 
+    public List<MainInfo> getNeighborsInfo(String fileName) {
+        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
+        processBuilder.redirectErrorStream(true);
+        List<String> results = new ArrayList<>();
+        Process process = null;
+        int exitCode;
+        try {
+            process = processBuilder.start();
+            results = readProcessOutput(process.getInputStream());
+            exitCode = process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(results);
+        return parseNeighborsInfo(results);
+    }
+
     private MainInfo parseAnswer(List<String> atString) {
         Map<String, String> map = new HashMap<>();
+        String refactoredString = "";
         for (String string : atString) {
-            if (string.length() >= 80 && (string.contains("ARFCN") || string.contains("MCC") || string.contains("MNC") || string.contains("LAC") ||
-                    string.contains("ID") || string.contains("RXLev"))) {
-                map = Splitter.on(",").withKeyValueSeparator(":").split(string);
+            if(string.contains("C1")) {
+                String str = string.replace("+MONI: ", "").replace("-", "");
+                int index = str.indexOf(",C1");
+                refactoredString = str.substring(0, index);
+                System.out.println("STRING " + refactoredString);
+                if (refactoredString.contains("Nc")) {
+                    map = Splitter.on(",").withKeyValueSeparator(":").split(refactoredString);
+                }
             }
         }
-        System.out.println(map);
-        return MainInfo.builder()
-                .MCC(map.get("MCC"))
-                .MNC(map.get("MNC"))
-                .RSSI(map.get("RXLev"))
-                .LAC(map.get("LAC"))
-                .Ch(map.get("ARFCN"))
-                .CellId(map.get("ID"))
-                .build();
+        return MainInfo.fromHashMapsToDto(map);
+    }
+
+    private List<MainInfo> parseNeighborsInfo(List<String> atString){
+        List<Map<String, String>> hashMaps = new ArrayList<>();
+        String refactoredString;
+        Map<String, String> map;
+        StringBuilder stringBuilder;
+        String parsedString;
+        for (String string : atString) {
+            if(string.contains("Cell")) {
+                String str = string.replace("+MONI: ", "").replace("Adj", "").replace("-", "")
+                        .replace("[", "").replace("]", "");
+                int index = str.indexOf(",C1");
+                refactoredString = str.substring(0, index);
+                stringBuilder = new StringBuilder(refactoredString);
+                stringBuilder.insert(0, "CellName:");
+                parsedString = stringBuilder.toString();
+                System.out.println("STRING 2 " + parsedString);
+                map = Splitter.on(",").withKeyValueSeparator(":").split(parsedString);
+                hashMaps.add(map);
+            }
+        }
+        System.out.println(MainInfo.fromHashMapsToDto(hashMaps));
+        return MainInfo.fromHashMapsToDto(hashMaps);
     }
 
     private String resolvePythonScriptPath(String filename) {

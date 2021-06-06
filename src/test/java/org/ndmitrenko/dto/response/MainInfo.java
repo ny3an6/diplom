@@ -20,12 +20,12 @@ public class MainInfo {
 
     public static org.ndmitrenko.dto.response.MainInfo fromHashMapsToDto(Map<String, String> map){
         return org.ndmitrenko.dto.response.MainInfo.builder()
-                .MCC(map.get("MCC"))
-                .MNC(map.get("MNC"))
-                .RSSI(map.get("RXLev"))
+                .MCC(map.get("Cc"))
+                .MNC(map.get("Nc"))
+                .RSSI(map.get("PWR"))
                 .LAC(map.get("LAC"))
                 .Ch(map.get("ARFCN"))
-                .CellId(map.get("ID"))
+                .CellId(map.get("Id"))
                 .CellName(map.get("CellName"))
                 .build();
     }

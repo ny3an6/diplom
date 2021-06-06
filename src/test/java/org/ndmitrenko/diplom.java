@@ -20,7 +20,7 @@ public class diplom {
 
     @Test
     public void getATAnswer() {
-        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("NeighboursInformation.py"));
+        ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath("MainInfoAndNeighbors.py"));
         processBuilder.redirectErrorStream(true);
         List<String> results = new ArrayList<>();
         Process process = null;
@@ -36,7 +36,7 @@ public class diplom {
         // +CCINFO= [SCELL], ARFCN= 1020, MCC= 250, MNC= 01, LAC= 332, ID= 25071, BSIC= 11, RXLev= -64dBm, C1= 42, C2= 42, TA= 0, TXPWR= 0
         System.out.println(parseAnswerMainInfo(results));
         System.out.println("");
-        System.out.println(parseNeighBorsInfo(results));
+        System.out.println(parseNeighborsInfo(results));
     }
 
     private org.ndmitrenko.dto.response.MainInfo parseAnswerMainInfo(List<String> atString) {
@@ -56,11 +56,10 @@ public class diplom {
         return MainInfo.fromHashMapsToDto(map);
     }
 
-    private List<MainInfo> parseNeighBorsInfo(List<String> atString){
+    private List<MainInfo> parseNeighborsInfo(List<String> atString){
         List<Map<String, String>> hashMaps = new ArrayList<>();
-        String refactoredString = "";
-        Map<String, String> map = new HashMap<>();
-        List<String> cellNeighborsList = new ArrayList<>();
+        String refactoredString;
+        Map<String, String> map;
         StringBuilder stringBuilder;
         String parsedString;
         for (String string : atString) {

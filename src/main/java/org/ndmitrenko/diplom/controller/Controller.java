@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class Controller {
 
@@ -19,8 +21,15 @@ public class Controller {
 
     @GetMapping("/")
     @CrossOrigin
-    public MainInfo getStarted(){
+    public MainInfo getMainInfo(){
 //        sendAtCommand.createData();
-        return sendAtCommand.getATAnswer("MainInfo.py");
+        return sendAtCommand.getMainInfo("MainInfoAndNeighbors.py");
+    }
+
+    @GetMapping("/neighbors")
+    @CrossOrigin
+    public List<MainInfo> getNeighbors(){
+//        sendAtCommand.createData();
+        return sendAtCommand.getNeighborsInfo("MainInfoAndNeighbors.py");
     }
 }
