@@ -20,13 +20,13 @@ public class MainInfo {
 
     public static MainInfo fromHashMapsToDto(Map<String, String> map){
         return MainInfo.builder()
-                .MCC(map.get("Cc"))
-                .MNC(map.get("Nc"))
-                .RSSI(map.get("PWR"))
-                .LAC(map.get("LAC"))
-                .Ch(map.get("ARFCN"))
-                .CellId(map.get("Id"))
-                .CellName(map.get("CellName"))
+                .MCC(map.get("Cc") != null ? map.get("Cc").trim() : null)
+                .MNC(map.get("Nc") != null ? map.get("Nc").trim() : null)
+                .RSSI(map.get("PWR").trim())
+                .LAC(map.get("LAC").trim())
+                .Ch(map.get("ARFCN").trim())
+                .CellId(map.get("Id").trim())
+                .CellName(map.get("CellName") != null ? map.get("CellName").trim(): null)
                 .build();
     }
 
