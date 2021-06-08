@@ -2,8 +2,10 @@ package org.ndmitrenko.diplom.service;
 
 import com.google.common.base.Splitter;
 import org.ndmitrenko.diplom.domain.BaseStationInfo;
+import org.ndmitrenko.diplom.domain.NeighborsInfo;
 import org.ndmitrenko.diplom.dto.response.MainInfo;
 import org.ndmitrenko.diplom.repository.BaseStationInfoRepository;
+import org.ndmitrenko.diplom.repository.NeighborsInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,9 @@ public class AtCommandService {
     @Autowired
     private BaseStationInfoRepository baseStationInfoRepository;
 
+    @Autowired
+    private NeighborsInfoRepository neighborsInfoRepository;
+
     public MainInfo getMainInfo(String fileName) {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
         processBuilder.redirectErrorStream(true);
@@ -31,10 +36,6 @@ public class AtCommandService {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
-        System.out.println(results);
-        System.out.println(results.size());
-        // +CCINFO= [SCELL], ARFCN= 1020, MCC= 250, MNC= 01, LAC= 332, ID= 25071, BSIC= 11, RXLev= -64dBm, C1= 42, C2= 42, TA= 0, TXPWR= 0
         return parseAnswer(results);
     }
 
@@ -51,8 +52,9 @@ public class AtCommandService {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
         System.out.println(results);
+        System.out.println(results.size());
+        // +CCINFO= [SCELL], ARFCN= 1020, MCC= 250, MNC= 01, LAC= 332, ID= 25071, BSIC= 11, RXLev= -64dBm, C1= 42, C2= 42, TA= 0, TXPWR= 0
         return parseNeighborsInfo(results);
     }
 
@@ -70,7 +72,10 @@ public class AtCommandService {
                 }
             }
         }
-        return MainInfo.fromHashMapsToDto(map);
+
+        MainInfo mainInfo = MainInfo.fromHashMapsToDto(map);
+        baseStationInfoRepository.save(BaseStationInfo.fromDto(mainInfo));
+        return mainInfo;
     }
 
     private List<MainInfo> parseNeighborsInfo(List<String> atString){
@@ -94,6 +99,8 @@ public class AtCommandService {
             }
         }
         System.out.println(MainInfo.fromHashMapsToDto(hashMaps));
+        List<NeighborsInfo> neighbors = NeighborsInfo.fromDto(MainInfo.fromHashMapsToDto(hashMaps));
+        neighbors.forEach(x-> neighborsInfoRepository.save(x));
         return MainInfo.fromHashMapsToDto(hashMaps);
     }
 
@@ -107,13 +114,5 @@ public class AtCommandService {
             return output.lines()
                     .collect(Collectors.toList());
         }
-    }
-
-    public void createTestData() {
-        BaseStationInfo bs = new BaseStationInfo();
-        bs.setBER(1);
-        bs.setCellId(3);
-
-        baseStationInfoRepository.save(bs);
     }
 }

@@ -5,6 +5,7 @@ def getStatus():
     ser = serial.Serial('COM6', 115200, timeout = 2)
     cmd = "AT+CPSI?\r"
     cmd = "AT+CSQ?\r"
+    cmd = "AT+CGSETI?\r"
     cmd = "AT+CCINFO\r"
     # cmd = "AT+MONI\r"
     # cmd = "AT+CLAC\r"

@@ -3,7 +3,13 @@ package org.ndmitrenko;
 import com.google.common.base.Splitter;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ndmitrenko.diplom.repository.BaseStationInfoRepository;
+import org.ndmitrenko.diplom.repository.NeighborsInfoRepository;
 import org.ndmitrenko.dto.response.MainInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 
 import java.io.*;
@@ -15,8 +21,20 @@ import java.util.stream.Collectors;
 
 
 
-
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class diplom {
+
+    @Autowired
+    private BaseStationInfoRepository baseStationInfoRepository;
+
+    @Autowired
+    private NeighborsInfoRepository neighborsInfoRepository;
+
+    @Test
+    public void testRepo(){
+
+    }
 
     @Test
     public void getATAnswer() {
