@@ -1,6 +1,6 @@
 package org.ndmitrenko.diplom.controller;
 
-import org.ndmitrenko.diplom.dto.response.MainInfo;
+import org.ndmitrenko.diplom.dto.response.BaseStationInfoDto;
 import org.ndmitrenko.diplom.service.AtCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,14 +21,14 @@ public class Controller {
 
     @GetMapping("/")
     @CrossOrigin
-    public MainInfo getMainInfo(){
+    public BaseStationInfoDto getMainInfo(){
 //        sendAtCommand.createData();
         return sendAtCommand.getMainInfo("MainInfoAndNeighbors.py");
     }
 
     @GetMapping("/neighbors")
     @CrossOrigin
-    public List<MainInfo> getNeighbors(){
+    public List<BaseStationInfoDto> getNeighbors(){
 //        sendAtCommand.createData();
         return sendAtCommand.getNeighborsInfo("MainInfoAndNeighbors.py");
     }

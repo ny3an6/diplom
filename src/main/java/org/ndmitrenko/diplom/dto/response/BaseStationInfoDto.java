@@ -3,13 +3,15 @@ package org.ndmitrenko.diplom.dto.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Builder
 @Data
-public class MainInfo {
+public class BaseStationInfoDto {
     private String MCC;
     private String MNC;
     private String Ch;
@@ -17,9 +19,10 @@ public class MainInfo {
     private String RSSI;
     private String CellId;
     private String CellName;
+    private Timestamp scan_date;
 
-    public static MainInfo fromHashMapsToDto(Map<String, String> map){
-        return MainInfo.builder()
+    public static BaseStationInfoDto fromHashMapsToDto(Map<String, String> map){
+        return BaseStationInfoDto.builder()
                 .MCC(map.get("Cc") != null ? map.get("Cc").trim() : null)
                 .MNC(map.get("Nc") != null ? map.get("Nc").trim() : null)
                 .RSSI(map.get("PWR").trim())
@@ -27,10 +30,11 @@ public class MainInfo {
                 .Ch(map.get("ARFCN").trim())
                 .CellId(map.get("Id").trim())
                 .CellName(map.get("CellName") != null ? map.get("CellName").trim(): null)
+                .scan_date(new Timestamp(new Date().getTime()))
                 .build();
     }
 
-    public static List<MainInfo> fromHashMapsToDto(List<Map<String, String>> maps){
-        return maps.stream().map(MainInfo::fromHashMapsToDto).collect(Collectors.toList());
+    public static List<BaseStationInfoDto> fromHashMapsToDto(List<Map<String, String>> maps){
+        return maps.stream().map(BaseStationInfoDto::fromHashMapsToDto).collect(Collectors.toList());
     }
 }

@@ -3,7 +3,7 @@ package org.ndmitrenko.diplom.service;
 import com.google.common.base.Splitter;
 import org.ndmitrenko.diplom.domain.BaseStationInfo;
 import org.ndmitrenko.diplom.domain.NeighborsInfo;
-import org.ndmitrenko.diplom.dto.response.MainInfo;
+import org.ndmitrenko.diplom.dto.response.BaseStationInfoDto;
 import org.ndmitrenko.diplom.repository.BaseStationInfoRepository;
 import org.ndmitrenko.diplom.repository.NeighborsInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class AtCommandService {
     @Autowired
     private NeighborsInfoRepository neighborsInfoRepository;
 
-    public MainInfo getMainInfo(String fileName) {
+    public BaseStationInfoDto getMainInfo(String fileName) {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
         processBuilder.redirectErrorStream(true);
         List<String> results = new ArrayList<>();
@@ -39,7 +39,7 @@ public class AtCommandService {
         return parseAnswer(results);
     }
 
-    public List<MainInfo> getNeighborsInfo(String fileName) {
+    public List<BaseStationInfoDto> getNeighborsInfo(String fileName) {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
         processBuilder.redirectErrorStream(true);
         List<String> results = new ArrayList<>();
@@ -58,7 +58,7 @@ public class AtCommandService {
         return parseNeighborsInfo(results);
     }
 
-    private MainInfo parseAnswer(List<String> atString) {
+    private BaseStationInfoDto parseAnswer(List<String> atString) {
         Map<String, String> map = new HashMap<>();
         String refactoredString = "";
         for (String string : atString) {
@@ -73,12 +73,14 @@ public class AtCommandService {
             }
         }
 
-        MainInfo mainInfo = MainInfo.fromHashMapsToDto(map);
-        baseStationInfoRepository.save(BaseStationInfo.fromDto(mainInfo));
-        return mainInfo;
+        BaseStationInfoDto baseStationInfoDto = BaseStationInfoDto.fromHashMapsToDto(map);
+        BaseStationInfo baseStationInfoEntity = BaseStationInfo.fromDto(baseStationInfoDto);
+        baseStationInfoEntity.setNeighborsInfo(parseNeighborsInfoForListeningWS(atString));
+        baseStationInfoRepository.save(baseStationInfoEntity);
+        return baseStationInfoDto;
     }
 
-    private List<MainInfo> parseNeighborsInfo(List<String> atString){
+    private List<BaseStationInfoDto> parseNeighborsInfo(List<String> atString){
         List<Map<String, String>> hashMaps = new ArrayList<>();
         String refactoredString;
         Map<String, String> map;
@@ -98,10 +100,36 @@ public class AtCommandService {
                 hashMaps.add(map);
             }
         }
-        System.out.println(MainInfo.fromHashMapsToDto(hashMaps));
-        List<NeighborsInfo> neighbors = NeighborsInfo.fromDto(MainInfo.fromHashMapsToDto(hashMaps));
+        System.out.println(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
+        List<NeighborsInfo> neighbors = NeighborsInfo.fromDto(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
         neighbors.forEach(x-> neighborsInfoRepository.save(x));
-        return MainInfo.fromHashMapsToDto(hashMaps);
+        return BaseStationInfoDto.fromHashMapsToDto(hashMaps);
+    }
+
+    private List<NeighborsInfo> parseNeighborsInfoForListeningWS(List<String> atString){
+        List<Map<String, String>> hashMaps = new ArrayList<>();
+        String refactoredString;
+        Map<String, String> map;
+        StringBuilder stringBuilder;
+        String parsedString;
+        for (String string : atString) {
+            if(string.contains("Cell")) {
+                String str = string.replace("+MONI: ", "").replace("Adj", "").replace("-", "")
+                        .replace("[", "").replace("]", "");
+                int index = str.indexOf(",C1");
+                refactoredString = str.substring(0, index);
+                stringBuilder = new StringBuilder(refactoredString);
+                stringBuilder.insert(0, "CellName:");
+                parsedString = stringBuilder.toString();
+                System.out.println("STRING 2 " + parsedString);
+                map = Splitter.on(",").withKeyValueSeparator(":").split(parsedString);
+                hashMaps.add(map);
+            }
+        }
+        System.out.println(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
+        List<NeighborsInfo> neighbors = NeighborsInfo.fromDto(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
+        neighbors.forEach(x-> neighborsInfoRepository.save(x));
+        return neighbors;
     }
 
     private String resolvePythonScriptPath(String filename) {

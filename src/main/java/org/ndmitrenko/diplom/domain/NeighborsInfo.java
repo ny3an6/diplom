@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.ndmitrenko.diplom.dto.response.MainInfo;
+import org.ndmitrenko.diplom.dto.response.BaseStationInfoDto;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Entity
@@ -19,25 +19,26 @@ import java.util.stream.Collectors;
 public class NeighborsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //@Column(name = "id", unique = true, nullable = false)
     private Long id;
     private String Ch;
     private String LAC;
     private String RSSI;
     private String CellId;
     private String CellName;
+    private Timestamp scan_date;
 
-    public static NeighborsInfo fromDto(MainInfo mainInfo){
+    public static NeighborsInfo fromDto(BaseStationInfoDto baseStationInfo){
         return NeighborsInfo.builder()
-                .RSSI(mainInfo.getRSSI())
-                .LAC(mainInfo.getLAC())
-                .Ch(mainInfo.getCh())
-                .CellId(mainInfo.getCellId())
-                .CellName(mainInfo.getCellName())
+                .RSSI(baseStationInfo.getRSSI())
+                .LAC(baseStationInfo.getLAC())
+                .Ch(baseStationInfo.getCh())
+                .CellId(baseStationInfo.getCellId())
+                .CellName(baseStationInfo.getCellName())
+                .scan_date(baseStationInfo.getScan_date())
                 .build();
     }
 
-    public static List<NeighborsInfo> fromDto(List<MainInfo> mainInfoList){
-        return mainInfoList.stream().map(NeighborsInfo::fromDto).collect(Collectors.toList());
+    public static List<NeighborsInfo> fromDto(List<BaseStationInfoDto> baseStationInfoList){
+        return baseStationInfoList.stream().map(NeighborsInfo::fromDto).collect(Collectors.toList());
     }
 }
