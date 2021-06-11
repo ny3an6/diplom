@@ -15,6 +15,7 @@ public class BaseStationInfoDto {
     private String MCC;
     private String MNC;
     private String Ch;
+    private String BER;
     private String LAC;
     private String RSSI;
     private String CellId;
@@ -31,6 +32,7 @@ public class BaseStationInfoDto {
                 .CellId(map.get("Id").trim())
                 .CellName(map.get("CellName") != null ? map.get("CellName").trim(): null)
                 .scan_date(new Timestamp(new Date().getTime()))
+                .BER(map.get("BER") !=null ? map.get("BER").trim() : null)
                 .build();
     }
 

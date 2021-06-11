@@ -11,7 +11,7 @@ public class DBConnectionProvider {
 
     private static final String dbHost = "localhost";
     private static final String username = "postgres";
-    private static final String password = "";
+    private static final String password = "989191Qwe";
 
     public Connection getConnection() {
         try {

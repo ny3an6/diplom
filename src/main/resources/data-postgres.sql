@@ -21,8 +21,8 @@ select * from base_station_info;
 --   ON public.base_station_info
 --   FOR EACH ROW
 --   EXECUTE PROCEDURE public.measured_insert();
-
-
+--
+--
 -- CREATE OR REPLACE FUNCTION public.measured_insert_neighbors_info()
 --   RETURNS trigger AS
 -- $BODY$BEGIN

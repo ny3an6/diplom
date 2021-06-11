@@ -7,7 +7,6 @@ import org.ndmitrenko.diplom.dto.response.BaseStationInfoDto;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +21,7 @@ public class BaseStationInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "cell_id", unique = false)
+    @Column(name = "cell_id")
     private String CellId;
     @Column(name = "MCC")
     private String MCC;
@@ -52,6 +51,7 @@ public class BaseStationInfo {
                 .CH(baseStationInfo.getCh())
                 .CellId(baseStationInfo.getCellId())
                 .date(baseStationInfo.getScan_date())
+                .BER(baseStationInfo.getBER())
                 .build();
     }
 

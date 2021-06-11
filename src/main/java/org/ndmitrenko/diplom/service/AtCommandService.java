@@ -43,7 +43,7 @@ public class AtCommandService {
         ProcessBuilder processBuilder = new ProcessBuilder("python", resolvePythonScriptPath(fileName));
         processBuilder.redirectErrorStream(true);
         List<String> results = new ArrayList<>();
-        Process process = null;
+        Process process;
         int exitCode;
         try {
             process = processBuilder.start();
@@ -61,18 +61,20 @@ public class AtCommandService {
     private BaseStationInfoDto parseAnswer(List<String> atString) {
         Map<String, String> map = new HashMap<>();
         String refactoredString = "";
+        String berString = "";
         for (String string : atString) {
+            System.out.println(string);
             if(string.contains("C1")) {
                 String str = string.replace("+MONI: ", "").replace("-", "");
                 int index = str.indexOf(",C1");
-                refactoredString = str.substring(0, index);
+                refactoredString = str.substring(0, index) + ",BER: " + atString.get(3).substring(9, 11);
                 System.out.println("STRING " + refactoredString);
                 if (refactoredString.contains("Nc")) {
                     map = Splitter.on(",").withKeyValueSeparator(":").split(refactoredString);
                 }
             }
         }
-
+        System.out.println(map);
         BaseStationInfoDto baseStationInfoDto = BaseStationInfoDto.fromHashMapsToDto(map);
         BaseStationInfo baseStationInfoEntity = BaseStationInfo.fromDto(baseStationInfoDto);
         baseStationInfoEntity.setNeighborsInfo(parseNeighborsInfoForListeningWS(atString));
