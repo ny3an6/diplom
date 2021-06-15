@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 public class diplom {
 
 //    @Autowired
@@ -31,7 +31,14 @@ public class diplom {
 
     @Test
     public void testRepo(){
-
+        String str = "+CSQ: 25,99".replace("+CSQ: ", "");
+        //str.replace("+CSQ: ", "");
+        StringBuilder build = new StringBuilder(str);
+        System.out.println("Pre Builder : " + build);
+        build.deleteCharAt(1);  // Shift the positions front.
+        //build.deleteCharAt(8-1);
+//        build.deleteCharAt(15-2);
+        System.out.println("Post Builder : " + build);
     }
 
     @Test

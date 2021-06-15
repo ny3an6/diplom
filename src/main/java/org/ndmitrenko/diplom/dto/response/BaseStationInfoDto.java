@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Builder
@@ -26,10 +27,10 @@ public class BaseStationInfoDto {
         return BaseStationInfoDto.builder()
                 .MCC(map.get("Cc") != null ? map.get("Cc").trim() : null)
                 .MNC(map.get("Nc") != null ? map.get("Nc").trim() : null)
-                .RSSI(map.get("PWR").trim())
-                .LAC(map.get("LAC").trim())
-                .Ch(map.get("ARFCN").trim())
-                .CellId(map.get("Id").trim())
+                .RSSI(map.get("PWR") != null ? map.get("PWR").trim() : null)
+                .LAC(map.get("LAC") != null ? map.get("LAC").trim() : null)
+                .Ch(map.get("ARFCN") != null ? map.get("ARFCN").trim() : null)
+                .CellId(map.get("Id") != null ? map.get("Id").trim() : null)
                 .CellName(map.get("CellName") != null ? map.get("CellName").trim(): null)
                 .scan_date(new Timestamp(new Date().getTime()))
                 .BER(map.get("BER") !=null ? map.get("BER").trim() : null)
@@ -38,5 +39,18 @@ public class BaseStationInfoDto {
 
     public static List<BaseStationInfoDto> fromHashMapsToDto(List<Map<String, String>> maps){
         return maps.stream().map(BaseStationInfoDto::fromHashMapsToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseStationInfoDto that = (BaseStationInfoDto) o;
+        return Objects.equals(MCC, that.MCC) && Objects.equals(MNC, that.MNC) && Objects.equals(Ch, that.Ch) && Objects.equals(BER, that.BER) && Objects.equals(LAC, that.LAC) && Objects.equals(RSSI, that.RSSI) && Objects.equals(CellId, that.CellId) && Objects.equals(CellName, that.CellName) && Objects.equals(scan_date, that.scan_date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(MCC, MNC, Ch, BER, LAC, RSSI, CellId, CellName, scan_date);
     }
 }

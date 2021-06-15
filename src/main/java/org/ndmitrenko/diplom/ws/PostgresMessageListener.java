@@ -48,14 +48,32 @@ public class PostgresMessageListener {
         return om;
     }
 
-    private void unlisten(String channel) {
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.execute("UNLISTEN \"" + channel + "\"");
-            stmt.close();
-        } catch (SQLException ex) {
-            logger.error("Error", ex);
-        }
+    private void startListening() {
+        tpts.scheduleWithFixedDelay(() -> {
+            logger.info("polling..." + Thread.currentThread().getName());
+            // issue a dummy query to contact the backend
+            // and receive any pending notifications.
+            try {
+                Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT 1");
+                rs.close();
+                stmt.close();
+                PGNotification[] notifications = ((PGConnection) connection).getNotifications();
+                if (notifications != null) {
+                    for (PGNotification notification : notifications) {
+                        logger.info("Got notification: " + notification.getName());
+                        logger.info("Got parameter: " + notification.getParameter());
+                        // ObjectMapper.readTree некорректно обрабатывает пустые строки
+                        JsonNode json = notification.getParameter().isEmpty() ?
+                                null :
+                                om.readTree(notification.getParameter());
+                        sendReplyBack(notification.getName(), json);
+                    }
+                }
+            } catch (SQLException | IOException e) {
+                logger.error("Error in NOTIFY processing", e);
+            }
+        }, 500);
     }
 
     public void subscribe(String channel, Session session) {
@@ -63,6 +81,16 @@ public class PostgresMessageListener {
             sessions.computeIfAbsent(session, s -> new HashSet<>()).add(channel);
             Statement stmt = connection.createStatement();
             stmt.execute("LISTEN \"" + channel + "\"");
+            stmt.close();
+        } catch (SQLException ex) {
+            logger.error("Error", ex);
+        }
+    }
+
+    private void unlisten(String channel) {
+        try {
+            Statement stmt = connection.createStatement();
+            stmt.execute("UNLISTEN \"" + channel + "\"");
             stmt.close();
         } catch (SQLException ex) {
             logger.error("Error", ex);
@@ -97,34 +125,6 @@ public class PostgresMessageListener {
                 }
             }
         });
-    }
-
-    private void startListening() {
-        tpts.scheduleWithFixedDelay(() -> {
-            logger.info("polling..." + Thread.currentThread().getName());
-            // issue a dummy query to contact the backend
-            // and receive any pending notifications.
-            try {
-                Statement stmt = connection.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT 1");
-                rs.close();
-                stmt.close();
-                PGNotification[] notifications = ((PGConnection) connection).getNotifications();
-                if (notifications != null) {
-                    for (PGNotification notification : notifications) {
-                        logger.info("Got notification: " + notification.getName());
-                        logger.info("Got parameter: " + notification.getParameter());
-                        // ObjectMapper.readTree некорректно обрабатывает пустые строки
-                        JsonNode json = notification.getParameter().isEmpty() ?
-                                null :
-                                om.readTree(notification.getParameter());
-                        sendReplyBack(notification.getName(), json);
-                    }
-                }
-            } catch (SQLException | IOException e) {
-                logger.error("Error in NOTIFY processing", e);
-            }
-        }, 500);
     }
 
     public void stopListening() {

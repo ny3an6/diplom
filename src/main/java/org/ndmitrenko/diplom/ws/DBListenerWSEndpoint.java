@@ -47,21 +47,6 @@ public class DBListenerWSEndpoint {
     }
 
     @OnMessage
-//    public void onMessage(final FromClient message, final Session session) {
-//        try {
-//            switch (message.getAction()) {
-//                case SUBSCRIBE:
-//                    listener.subscribe(message.getChannel(), session);
-//                    session.getBasicRemote().sendObject(ToClient.message("subscribed to channel " + message.getChannel(), om));
-//                    break;
-//                case UNSUBSCRIBE:
-//                    listener.unsubscribe(message.getChannel(), session);
-//                    session.getBasicRemote().sendObject(ToClient.message("unsubscribed from channel " + message.getChannel(), om));
-//            }
-//        } catch (IOException | EncodeException e) {
-//            e.printStackTrace();
-//        }
-//    }
     public ToClient onMessage(final FromClient message, final Session session) {
         switch (message.getAction()) {
             case SUBSCRIBE:

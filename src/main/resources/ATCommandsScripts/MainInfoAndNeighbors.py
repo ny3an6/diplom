@@ -9,7 +9,7 @@ def getStatus():
     # cmd = "AT\r"
     ser.write(ber_rssi.encode())
     ser.write(main_info.encode())
-    ser.write("AT+CNMP=13\r".encode())
+    # ser.write("AT+CNMP=13\r".encode())
     # ser.write(uplink_downlink.encode())
     response = ser.read(1024)
     print(response.decode('utf-8'))

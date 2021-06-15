@@ -2,6 +2,7 @@ package org.ndmitrenko.diplom.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ndmitrenko.diplom.dto.response.BaseStationInfoDto;
 
@@ -9,6 +10,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class BaseStationInfo {
 
     @Id
@@ -31,8 +34,6 @@ public class BaseStationInfo {
     private String LAC;
     @Column(name = "BER")
     private String BER;
-    @Column(name = "SNR")
-    private String SNR;
     @Column(name = "RSSI")
     private String RSSI;
     @Column(name = "CH")
@@ -59,83 +60,16 @@ public class BaseStationInfo {
         return maps.stream().map(BaseStationInfoDto::fromHashMapsToDto).collect(Collectors.toList());
     }
 
-    public Long getId() {
-        return id;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseStationInfo that = (BaseStationInfo) o;
+        return Objects.equals(id, that.id) && Objects.equals(CellId, that.CellId) && Objects.equals(MCC, that.MCC) && Objects.equals(MNC, that.MNC) && Objects.equals(LAC, that.LAC) && Objects.equals(BER, that.BER) && Objects.equals(RSSI, that.RSSI) && Objects.equals(CH, that.CH) && Objects.equals(date, that.date) && Objects.equals(neighborsInfo, that.neighborsInfo);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCellId() {
-        return CellId;
-    }
-
-    public void setCellId(String cellId) {
-        CellId = cellId;
-    }
-
-    public String getMCC() {
-        return MCC;
-    }
-
-    public void setMCC(String MCC) {
-        this.MCC = MCC;
-    }
-
-    public String getMNC() {
-        return MNC;
-    }
-
-    public void setMNC(String MNC) {
-        this.MNC = MNC;
-    }
-
-    public String getLAC() {
-        return LAC;
-    }
-
-    public void setLAC(String LAC) {
-        this.LAC = LAC;
-    }
-
-    public String getBER() {
-        return BER;
-    }
-
-    public void setBER(String BER) {
-        this.BER = BER;
-    }
-
-    public String getSNR() {
-        return SNR;
-    }
-
-    public void setSNR(String SNR) {
-        this.SNR = SNR;
-    }
-
-    public String getRSSI() {
-        return RSSI;
-    }
-
-    public void setRSSI(String RSSI) {
-        this.RSSI = RSSI;
-    }
-
-    public String getCH() {
-        return CH;
-    }
-
-    public void setCH(String CH) {
-        this.CH = CH;
-    }
-
-    public List<NeighborsInfo> getNeighborsInfo() {
-        return neighborsInfo;
-    }
-
-    public void setNeighborsInfo(List<NeighborsInfo> neighborsInfo) {
-        this.neighborsInfo = neighborsInfo;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, CellId, MCC, MNC, LAC, BER, RSSI, CH, date, neighborsInfo);
     }
 }

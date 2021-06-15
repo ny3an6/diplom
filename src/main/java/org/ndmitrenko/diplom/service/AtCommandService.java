@@ -61,25 +61,48 @@ public class AtCommandService {
     private BaseStationInfoDto parseAnswer(List<String> atString) {
         Map<String, String> map = new HashMap<>();
         String refactoredString = "";
-        String berString = "";
         for (String string : atString) {
-            System.out.println(string);
             if(string.contains("C1")) {
                 String str = string.replace("+MONI: ", "").replace("-", "");
                 int index = str.indexOf(",C1");
-                refactoredString = str.substring(0, index) + ",BER: " + atString.get(3).substring(9, 11);
+                refactoredString = str.substring(0, index) + ",BER: " + atString.get(3).substring(9);
                 System.out.println("STRING " + refactoredString);
                 if (refactoredString.contains("Nc")) {
                     map = Splitter.on(",").withKeyValueSeparator(":").split(refactoredString);
                 }
             }
         }
-        System.out.println(map);
         BaseStationInfoDto baseStationInfoDto = BaseStationInfoDto.fromHashMapsToDto(map);
         BaseStationInfo baseStationInfoEntity = BaseStationInfo.fromDto(baseStationInfoDto);
         baseStationInfoEntity.setNeighborsInfo(parseNeighborsInfoForListeningWS(atString));
         baseStationInfoRepository.save(baseStationInfoEntity);
         return baseStationInfoDto;
+    }
+    private List<NeighborsInfo> parseNeighborsInfoForListeningWS(List<String> atString){
+        List<Map<String, String>> hashMaps = new ArrayList<>();
+        String refactoredString;
+        Map<String, String> map;
+        StringBuilder stringBuilder;
+        String parsedString;
+        for (String string : atString) {
+            if(string.contains("Cell")) {
+                String str = string.replace("+MONI: ", "").replace("Adj", "").replace("-", "")
+                        .replace("[", "").replace("]", "");
+                int index = str.indexOf(",C1");
+                refactoredString = str.substring(0, index);
+                stringBuilder = new StringBuilder(refactoredString);
+                stringBuilder.insert(0, "CellName:");
+                parsedString = stringBuilder.toString();
+                System.out.println("STRING 2 " + parsedString);
+                map = Splitter.on(",").withKeyValueSeparator(":").split(parsedString);
+                hashMaps.add(map);
+            }
+        }
+
+        System.out.println(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
+        List<NeighborsInfo> neighbors = NeighborsInfo.fromDto(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
+        neighbors.forEach(x-> neighborsInfoRepository.save(x));
+        return neighbors;
     }
 
     private List<BaseStationInfoDto> parseNeighborsInfo(List<String> atString){
@@ -108,31 +131,6 @@ public class AtCommandService {
         return BaseStationInfoDto.fromHashMapsToDto(hashMaps);
     }
 
-    private List<NeighborsInfo> parseNeighborsInfoForListeningWS(List<String> atString){
-        List<Map<String, String>> hashMaps = new ArrayList<>();
-        String refactoredString;
-        Map<String, String> map;
-        StringBuilder stringBuilder;
-        String parsedString;
-        for (String string : atString) {
-            if(string.contains("Cell")) {
-                String str = string.replace("+MONI: ", "").replace("Adj", "").replace("-", "")
-                        .replace("[", "").replace("]", "");
-                int index = str.indexOf(",C1");
-                refactoredString = str.substring(0, index);
-                stringBuilder = new StringBuilder(refactoredString);
-                stringBuilder.insert(0, "CellName:");
-                parsedString = stringBuilder.toString();
-                System.out.println("STRING 2 " + parsedString);
-                map = Splitter.on(",").withKeyValueSeparator(":").split(parsedString);
-                hashMaps.add(map);
-            }
-        }
-        System.out.println(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
-        List<NeighborsInfo> neighbors = NeighborsInfo.fromDto(BaseStationInfoDto.fromHashMapsToDto(hashMaps));
-        neighbors.forEach(x-> neighborsInfoRepository.save(x));
-        return neighbors;
-    }
 
     private String resolvePythonScriptPath(String filename) {
         File file = new File("src/main/resources/ATCommandsScripts/" + filename);
